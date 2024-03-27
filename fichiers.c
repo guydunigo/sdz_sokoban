@@ -8,36 +8,34 @@
 
 char chargerNiveau(char niveau[][NB_BLOCS_HAUTEUR])
 {
-    FILE* fichier = NULL;
-    char ligneFichier[NB_BLOCS_TOTAL + 1] = {0};
-    int i = 0, j = 0;
 
-    fichier = fopen("niveaux.lvl", "r");
+    FILE* fichier = fopen("niveaux.lvl", "r");
     if (fichier == NULL)
         return 0;
 
+    char ligneFichier[NB_BLOCS_TOTAL + 1] = {0};
     fgets(ligneFichier, NB_BLOCS_TOTAL + 1, fichier);
 
-    for (i = 0 ; i < NB_BLOCS_LARGEUR ; i++)
+    for (int j = 0 ; j < NB_BLOCS_HAUTEUR ; j++)
     {
-        for (j = 0 ; j < NB_BLOCS_HAUTEUR ; j++)
+        for (int i = 0 ; i < NB_BLOCS_LARGEUR ; i++)
         {
-            switch (ligneFichier[i * NB_BLOCS_LARGEUR + j])
+            switch (ligneFichier[j * NB_BLOCS_HAUTEUR + i])
             {
             case '0':
-                niveau[j][i] = 0;
+                niveau[i][j] = 0;
                 break;
             case '1':
-                niveau[j][i] = 1;
+                niveau[i][j] = 1;
                 break;
             case '2':
-                niveau[j][i] = 2;
+                niveau[i][j] = 2;
                 break;
             case '3':
-                niveau[j][i] = 3;
+                niveau[i][j] = 3;
                 break;
             case '4':
-                niveau[j][i] = 4;
+                niveau[i][j] = 4;
                 break;
             }
         }
@@ -50,21 +48,20 @@ char chargerNiveau(char niveau[][NB_BLOCS_HAUTEUR])
 // All chars + line feed + null
 #define LEVEL_STRING_LENGTH NB_BLOCS_TOTAL + 2
 char sauvegarderNiveau(char niveau[][NB_BLOCS_HAUTEUR]) {
-    FILE *fichier = fopen("niveaux.lvl", "w");
+    FILE *fichier = fopen("niveaux.lvl", "a");
     if (fichier == NULL) {
         return 0;
     }
 
     char tmp[LEVEL_STRING_LENGTH] = {'0'};
 
-    int i = 0, j = 0;
-    for (; i < NB_BLOCS_LARGEUR; i++) {
-        for (; j < NB_BLOCS_HAUTEUR ; j++) {
-            tmp[i*NB_BLOCS_LARGEUR*j] = '0' + (niveau[j][i] % 10);
+    for (int j = 0; j < NB_BLOCS_HAUTEUR; j++) {
+        for (int i = 0; i < NB_BLOCS_LARGEUR ; i++) {
+            tmp[j*NB_BLOCS_HAUTEUR+i] = '0' + niveau[i][j] % 10;
         }
     }
 
-    tmp[i] = '\n';
+    tmp[NB_BLOCS_TOTAL] = '\n';
     fputs(tmp, fichier);
 
     fclose(fichier);
