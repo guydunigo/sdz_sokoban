@@ -51,36 +51,36 @@ void jouer(SDL_Surface *ecran) {
     while (continuer) {
         SDL_WaitEvent(&event);
         switch (event.type) {
-            case SDL_QUIT:
+        case SDL_QUIT:
+            continuer = 0;
+            break;
+        case SDL_KEYDOWN:
+            switch (event.key.keysym.sym) {
+            case SDLK_ESCAPE:
                 continuer = 0;
                 break;
-            case SDL_KEYDOWN:
-                switch (event.key.keysym.sym) {
-                    case SDLK_ESCAPE:
-                        continuer = 0;
-                        break;
-                    case SDLK_UP:
-                        marioActuel = mario[HAUT];
-                        deplacerJoueur(carte, &positionJoueur, HAUT);
-                        break;
-                    case SDLK_DOWN:
-                        marioActuel = mario[BAS];
-                        deplacerJoueur(carte, &positionJoueur, BAS);
-                        break;
-                    case SDLK_LEFT:
-                        marioActuel = mario[GAUCHE];
-                        deplacerJoueur(carte, &positionJoueur, GAUCHE);
-                        break;
-                    case SDLK_RIGHT:
-                        marioActuel = mario[DROITE];
-                        deplacerJoueur(carte, &positionJoueur, DROITE);
-                        break;
-                    default:
-                        break;
-                }
+            case SDLK_UP:
+                marioActuel = mario[HAUT];
+                deplacerJoueur(carte, &positionJoueur, HAUT);
+                break;
+            case SDLK_DOWN:
+                marioActuel = mario[BAS];
+                deplacerJoueur(carte, &positionJoueur, BAS);
+                break;
+            case SDLK_LEFT:
+                marioActuel = mario[GAUCHE];
+                deplacerJoueur(carte, &positionJoueur, GAUCHE);
+                break;
+            case SDLK_RIGHT:
+                marioActuel = mario[DROITE];
+                deplacerJoueur(carte, &positionJoueur, DROITE);
                 break;
             default:
                 break;
+            }
+            break;
+        default:
+            break;
         }
 
         // Effacement de l'écran.
@@ -95,19 +95,19 @@ void jouer(SDL_Surface *ecran) {
                 position.y = j * TAILLE_BLOC;
 
                 switch (carte[i][j]) {
-                    case MUR:
-                        SDL_BlitSurface(mur, NULL, ecran, &position);
-                        break;
-                    case CAISSE:
-                        SDL_BlitSurface(caisse, NULL, ecran, &position);
-                        break;
-                    case CAISSE_OK:
-                        SDL_BlitSurface(caisseOK, NULL, ecran, &position);
-                        break;
-                    case OBJECTIF:
-                        SDL_BlitSurface(objectif, NULL, ecran, &position);
-                        objectifsRestants = 1;
-                        break;
+                case MUR:
+                    SDL_BlitSurface(mur, NULL, ecran, &position);
+                    break;
+                case CAISSE:
+                    SDL_BlitSurface(caisse, NULL, ecran, &position);
+                    break;
+                case CAISSE_OK:
+                    SDL_BlitSurface(caisseOK, NULL, ecran, &position);
+                    break;
+                case OBJECTIF:
+                    SDL_BlitSurface(objectif, NULL, ecran, &position);
+                    objectifsRestants = 1;
+                    break;
                 }
             }
         }
@@ -136,34 +136,36 @@ void jouer(SDL_Surface *ecran) {
         SDL_FreeSurface(mario[i]);
 }
 
-void deplacerJoueur(char carte[][NB_BLOCS_HAUTEUR], SDL_Rect *pos, char direction) {
+void deplacerJoueur(char carte[][NB_BLOCS_HAUTEUR], SDL_Rect *pos,
+                    char direction) {
     int x_modifier = 0, y_modifier = 0;
     switch (direction) {
-        case HAUT:
-            y_modifier = -1;
-            break;
-        case BAS:
-            y_modifier = 1;
-            break;
-        case GAUCHE:
-            x_modifier = -1;
-            break;
-        case DROITE:
-            x_modifier = 1;
+    case HAUT:
+        y_modifier = -1;
+        break;
+    case BAS:
+        y_modifier = 1;
+        break;
+    case GAUCHE:
+        x_modifier = -1;
+        break;
+    case DROITE:
+        x_modifier = 1;
     }
 
     SDL_Rect new_pos, new_box_pos;
-    new_pos.x = pos->x+x_modifier;
-    new_pos.y = pos->y+y_modifier;
-    new_box_pos.x = pos->x+x_modifier*2;
-    new_box_pos.y = pos->y+y_modifier*2;
+    new_pos.x = pos->x + x_modifier;
+    new_pos.y = pos->y + y_modifier;
+    new_box_pos.x = pos->x + x_modifier * 2;
+    new_box_pos.y = pos->y + y_modifier * 2;
 
     // Si le joueur dépasse l'écran
-    if (isStuck(carte, &new_pos))
+    if (isPlayerStuck(carte, &new_pos))
         return;
     // Si on pousse une caisse :
-    if (carte[new_pos.x][new_pos.y] == CAISSE || carte[new_pos.x][new_pos.y] == CAISSE_OK) {
-        if (isStuck(carte, &new_box_pos))
+    if (carte[new_pos.x][new_pos.y] == CAISSE ||
+        carte[new_pos.x][new_pos.y] == CAISSE_OK) {
+        if (isCaisseStuck(carte, &new_box_pos))
             return;
         else
             deplacerCaisse(carte, &new_pos, &new_box_pos);
@@ -173,16 +175,23 @@ void deplacerJoueur(char carte[][NB_BLOCS_HAUTEUR], SDL_Rect *pos, char directio
     pos->y = new_pos.y;
 }
 
-char isStuck(char carte[][NB_BLOCS_HAUTEUR], SDL_Rect* new_pos) {
-    // Bords de la carte ou mur
-    return new_pos->x < 0 || new_pos->x >= NB_BLOCS_LARGEUR - 1
-            || new_pos->y < 0 || new_pos->y >= NB_BLOCS_HAUTEUR - 1
-            || carte[new_pos->x][new_pos->y] == MUR;
+// Bords de la carte ou mur
+char isPlayerStuck(char carte[][NB_BLOCS_HAUTEUR], SDL_Rect *new_pos) {
+    return new_pos->x < 0 || new_pos->x >= NB_BLOCS_LARGEUR - 1 ||
+           new_pos->y < 0 || new_pos->y >= NB_BLOCS_HAUTEUR - 1 ||
+           carte[new_pos->x][new_pos->y] == MUR;
 }
 
-void deplacerCaisse(char carte[][NB_BLOCS_HAUTEUR], SDL_Rect *old_pos, SDL_Rect *new_pos) {
-    char* old_case = carte[old_pos->x] + old_pos->y;
-    char* new_case = carte[new_pos->x] + new_pos->y;
+// Comme isPlayerStuck, mais un caisse peut aussi être bloquée par une autre.
+char isCaisseStuck(char carte[][NB_BLOCS_HAUTEUR], SDL_Rect *new_pos) {
+    return isPlayerStuck(carte, new_pos) ||
+           carte[new_pos->x][new_pos->y] == CAISSE;
+}
+
+void deplacerCaisse(char carte[][NB_BLOCS_HAUTEUR], SDL_Rect *old_pos,
+                    SDL_Rect *new_pos) {
+    char *old_case = carte[old_pos->x] + old_pos->y;
+    char *new_case = carte[new_pos->x] + new_pos->y;
 
     if (*old_case == CAISSE || *old_case == CAISSE_OK) {
         *new_case = *new_case == OBJECTIF ? CAISSE_OK : CAISSE;

@@ -28,66 +28,66 @@ void editeur(SDL_Surface *ecran) {
     while (continuer) {
         SDL_WaitEvent(&event);
         switch (event.type) {
-            case SDL_QUIT:
+        case SDL_QUIT:
+            continuer = 0;
+            break;
+        case SDL_MOUSEBUTTONDOWN:
+            if (event.button.button == SDL_BUTTON_LEFT) {
+                carte[event.button.x / TAILLE_BLOC]
+                     [event.button.y / TAILLE_BLOC] = objetActuel;
+                clicGaucheEnCours = 1;
+            } else if (event.button.button == SDL_BUTTON_RIGHT) {
+                carte[event.button.x / TAILLE_BLOC]
+                     [event.button.y / TAILLE_BLOC] = VIDE;
+                clicDroitEnCours = 1;
+            }
+            break;
+        case SDL_MOUSEBUTTONUP:
+            if (event.button.button == SDL_BUTTON_LEFT)
+                clicGaucheEnCours = 0;
+            else if (event.button.button == SDL_BUTTON_RIGHT)
+                clicDroitEnCours = 0;
+            break;
+        case SDL_MOUSEMOTION:
+            positionSouris.x = event.motion.x + 8;
+            positionSouris.y = event.motion.y + 15;
+            if (clicGaucheEnCours) {
+                carte[event.motion.x / TAILLE_BLOC]
+                     [event.motion.y / TAILLE_BLOC] = objetActuel;
+            } else if (clicDroitEnCours) {
+                carte[event.motion.x / TAILLE_BLOC]
+                     [event.motion.y / TAILLE_BLOC] = VIDE;
+            }
+            break;
+        case SDL_KEYDOWN:
+            switch (event.key.keysym.sym) {
+            case SDLK_ESCAPE:
                 continuer = 0;
                 break;
-            case SDL_MOUSEBUTTONDOWN:
-                if (event.button.button == SDL_BUTTON_LEFT) {
-                    carte[event.button.x / TAILLE_BLOC][event.button.y / TAILLE_BLOC] =
-                        objetActuel;
-                    clicGaucheEnCours = 1;
-                } else if (event.button.button == SDL_BUTTON_RIGHT) {
-                    carte[event.button.x / TAILLE_BLOC][event.button.y / TAILLE_BLOC] =
-                        VIDE;
-                    clicDroitEnCours = 1;
-                }
+            case SDLK_s:
+                sauvegarderNiveau(carte);
                 break;
-            case SDL_MOUSEBUTTONUP:
-                if (event.button.button == SDL_BUTTON_LEFT)
-                    clicGaucheEnCours = 0;
-                else if (event.button.button == SDL_BUTTON_RIGHT)
-                    clicDroitEnCours = 0;
+            case SDLK_c:
+                chargerNiveau(carte);
                 break;
-            case SDL_MOUSEMOTION:
-                positionSouris.x = event.motion.x + 8;
-                positionSouris.y = event.motion.y + 15;
-                if (clicGaucheEnCours) {
-                    carte[event.motion.x / TAILLE_BLOC][event.motion.y / TAILLE_BLOC] =
-                        objetActuel;
-                } else if (clicDroitEnCours) {
-                    carte[event.motion.x / TAILLE_BLOC][event.motion.y / TAILLE_BLOC] =
-                        VIDE;
-                }
+            case SDLK_KP1:
+                objetActuel = MUR;
                 break;
-            case SDL_KEYDOWN:
-                switch (event.key.keysym.sym) {
-                    case SDLK_ESCAPE:
-                        continuer = 0;
-                        break;
-                    case SDLK_s:
-                        sauvegarderNiveau(carte);
-                        break;
-                    case SDLK_c:
-                        chargerNiveau(carte);
-                        break;
-                    case SDLK_KP1:
-                        objetActuel = MUR;
-                        break;
-                    case SDLK_KP2:
-                        objetActuel = CAISSE;
-                        break;
-                    case SDLK_KP3:
-                        objetActuel = OBJECTIF;
-                        break;
-                    case SDLK_KP4:
-                        objetActuel = MARIO;
-                        break;
-                    default:
-                        break;
-                }
+            case SDLK_KP2:
+                objetActuel = CAISSE;
+                break;
+            case SDLK_KP3:
+                objetActuel = OBJECTIF;
+                break;
+            case SDLK_KP4:
+                objetActuel = MARIO;
                 break;
             default:
                 break;
+            }
+            break;
+        default:
+            break;
         }
         SDL_FillRect(ecran, NULL, SDL_MapRGB(ecran->format, 255, 255, 255));
 
@@ -97,35 +97,35 @@ void editeur(SDL_Surface *ecran) {
                 position.y = j * TAILLE_BLOC;
 
                 switch (carte[i][j]) {
-                    case MUR:
-                        SDL_BlitSurface(mur, NULL, ecran, &position);
-                        break;
-                    case CAISSE:
-                        SDL_BlitSurface(caisse, NULL, ecran, &position);
-                        break;
-                    case OBJECTIF:
-                        SDL_BlitSurface(objectif, NULL, ecran, &position);
-                        break;
-                    case MARIO:
-                        SDL_BlitSurface(mario, NULL, ecran, &position);
-                        break;
+                case MUR:
+                    SDL_BlitSurface(mur, NULL, ecran, &position);
+                    break;
+                case CAISSE:
+                    SDL_BlitSurface(caisse, NULL, ecran, &position);
+                    break;
+                case OBJECTIF:
+                    SDL_BlitSurface(objectif, NULL, ecran, &position);
+                    break;
+                case MARIO:
+                    SDL_BlitSurface(mario, NULL, ecran, &position);
+                    break;
                 }
             }
         }
 
         switch (objetActuel) {
-            case MUR:
-                SDL_BlitSurface(mur, NULL, ecran, &positionSouris);
-                break;
-            case CAISSE:
-                SDL_BlitSurface(caisse, NULL, ecran, &positionSouris);
-                break;
-            case OBJECTIF:
-                SDL_BlitSurface(objectif, NULL, ecran, &positionSouris);
-                break;
-            case MARIO:
-                SDL_BlitSurface(mario, NULL, ecran, &positionSouris);
-                break;
+        case MUR:
+            SDL_BlitSurface(mur, NULL, ecran, &positionSouris);
+            break;
+        case CAISSE:
+            SDL_BlitSurface(caisse, NULL, ecran, &positionSouris);
+            break;
+        case OBJECTIF:
+            SDL_BlitSurface(objectif, NULL, ecran, &positionSouris);
+            break;
+        case MARIO:
+            SDL_BlitSurface(mario, NULL, ecran, &positionSouris);
+            break;
         }
 
         SDL_Flip(ecran);
